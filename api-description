@@ -1,0 +1,191 @@
+
+# Login
+
+Path → POST /api/v1/auth/login
+
+## Headers
+
+{
+  'api-key' : < Client's API KEY>
+  'client-id' : <Client's ID>
+}
+
+
+## INPUTS
+
+{
+    log: {
+      type: "string",
+      required: true,
+      example: 'ejaraPanel',
+      description: "username or email",
+    },
+    password: {
+      type: "string",
+      required: true,
+      description: "The password, in clear",
+    },
+  }
+ 
+ 
+## Response
+### ON SUCCESS
+    {
+          responsecode: 'login_ok',
+          message: Login successful,
+          token: String,
+          refresh_token: String,
+          expires_in: String,
+          token_type: String, //'Bearer'
+          data: {
+            username: String, //The username of the customer
+            first_name: String, //The first_name of the customer
+            last_name: String, //The last_name of the customer
+            email_address: String, The email_address of the customer
+            account_status: String,// confirmed, active, frozen, ...
+            customer_type: String, // admin, client, ...
+            country_code: String, // CM, CI, ...
+            preferred_language: String,// fr,en
+          },
+        });
+      }
+ 
+### ON ERROR
+
+#### Generic server error
+
+status code : 500
+headers :{
+  x-exit : serverError
+  x-exit-description : An error occured. Contact an admin for assistance.
+}
+body:{
+	message: 'Unable to get customer details. Contat Admin for help.'
+}
+
+#### Invalid username, email or password
+
+status code : 400
+headers :{
+  x-exit : badCombo
+  x-exit-description : The provided username/email and password combination does not match any user in the database.
+}
+body:{
+	message: 'The provided username/email or password is incorrect'
+}
+
+#### Account is inactive
+
+status code : 400
+headers :{
+  x-exit : badCombo
+  x-exit-description : The corresponding account is either desactivated, frozen or deleted
+}
+body:{
+	message: login_inactive_account
+}
+
+# Get the list of transactions
+
+Getting the list of transactions (buy, sell, send)
+
+Path → GET /api/v1/marketplace/admin-transactions-per-status-and-type
+
+Headers: 
+{
+  'api-key' : < Client's API KEY>
+  'client-id' : <Client's ID>
+  'token' : 'Bearer <user token>'
+}
+
+## INPUTS
+
+{
+    transaction_status: {
+      type: "string",
+      required: true,
+      example: 'pending, confirmed, rejected, all',
+      description: "The status of the transactions to be searched for",
+    },
+    transaction_type: {
+      type: "string",
+      required: true,
+      example: 'buy, send, sell, all',
+      description: "The type of transaction to be searched for",
+    },
+  }
+
+
+## Response
+### ON SUCCESS
+
+{
+        responseCode: <string>, // 'get_transaction_list_ok',
+        message: <string>,//'n transaction(s) found'
+        data: {
+        [
+         transaction_id: <number>,//
+         transaction_detail_id: <number>,// 
+         transaction_type: <string>,//
+         transaction_status: <string>,//
+         emitter: <string>, //
+         receiver: <string>,//
+         currency: <string>,//
+         amount_raw: <number>,// 
+         amount_net: <number>,// 
+         public_key_other_party: <string>, //
+         recipient_address: <string>,//
+         fiat_currency: <string>,//
+         amount_in_customer_fiat: <number>,// 
+         transaction_hash: <string>, //
+         confirmation_comment: <string>, //
+         amount_at_order_time: <number>,//
+         amount_at_order_time_in_customer_fiat: <number>,// 
+         from_address: <string>,//
+         fiat_network_fees: <number>,// 
+         network_fees_in_customer_fiat: <number>,// 
+         crypto_amount: <number>,// 
+         crypto_amount_at_order_time: <number>,//
+         crypto_currency: <string>,//
+         date_creation: <number>,// 
+         date_update: <number>,//
+         confirmed_by: <string>,//
+                                                              
+        },... {}
+        ]
+ }
+
+### ON ERROR
+#### Invalid transaction status
+
+status code : 400
+headers :{
+  x-exit : invalidTransactionStatus
+  x-exit-description : The provided transaction status is invalid
+}
+body:{
+	message: 'The provided transaction status is invalid.'
+}
+
+#### Invalid transaction type
+
+status code : 400
+headers :{
+  x-exit : invalidTransactionType
+  x-exit-description : The provided transaction type is invalid
+}
+body:{
+	message: 'The provided transaction type is invalid.'
+}
+
+#### Generic server error
+
+status code : 500
+headers :{
+  x-exit : serverError
+  x-exit-description : An error occured. Contact an admin for assistance.
+}
+body:{
+	message: 'An error occured. Contact an admin for assistance.'
+}
+
